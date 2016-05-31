@@ -8,17 +8,6 @@
 % Boundary layer mixing is used. The interior mixing scheme can      %
 % be chosen as KPP or Pacanowski & Philander or Peters 88.           %
 %                                                                    %
-% To do:                                                             %
-%       - add in nonlocal transport part -> only nonzero in          %
-%       unstable situations! -> Almost always stable as long as ML   %
-%       is at least as deep as first grid point (to absorb some SW   %
-%       radiation inside the mixed layer depth), which is set as a   %
-%       minimum depth.                                               %
-%       - Add in double diffusive contribution to interior           %
-%       KPP?                                                         %
-%       - Add in diurnal cycle? -> Needs nonlocal fluxes             %
-%       - Add in a PGF to counter the wind-stress?                   %
-%                                                                    %
 % This script relies on several additional scripts;                  %
 %                                                                    %
 % Diff1Dconst.m -> contains most constants                          %
@@ -42,13 +31,12 @@ Diff1Dconst;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
-dt = 120;
-% $$$ tfin = 120*86400;%30*86400; %sec
-tfin = 12*15*86400;%30*86400; %sec
-tplot = 720/4; %plot every tplot slices.
+dt = 480;
+tfin = 180*86400;%30*86400; %sec
+tplot = 160;%720/4; %plot every tplot slices.
 meanplot = 0; %plot mean curves on left of pcolor plots.
 % $$$ pplot = 0; %plot profiles as code runs
-% $$$ colplot = 1; %plot pcolor at end.
+% $$$ % $$$ colplot = 1; %plot pcolor at end.
 t = 0:dt:tfin;Nt = length(t); %time
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,9 +95,17 @@ rTIW = 0; %0 -> dvdy is ideal (see next few lines)
 dvdyFILE = 'ROMS_dvdy.mat';
 uSYM = 'uSYM_PP.mat';%'uSYM_PP.mat';
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 0;%2.8e-6; %amplitude of stretching dv/dy.
+amplitude = 2.8e-6; %amplitude of stretching dv/dy.
 dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
 dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
+
+%Kelvin wave forcing:
+Kperiod = 60*86400; %period of oscillaiton (s)
+Kamp = 10; %amplitude (ms-1)
+Kpha = pi/2; %initial phase
+Kmod = 1; %Vertical mode number.
+load('TSvadv.mat');
+Vadv_only = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL mixing
@@ -152,15 +148,25 @@ KPPMLD = -15; %Initial guess mixed layer.
 % INITIAL conditions
 
 % Initial profiles from mean BMIX profiles:
-load(['/home/ryan/GFD_Research/Data_Analysis/Holmes2014_Analysis/' ...
-      'Time_Series/BMIX_140W_TS.mat']);
+load('BMIX_140W_TS.mat');
 zI = mean(Z,2);
 uI = mean(U,2);
 vI = mean(V,2)*0; %SET TO ZERO!!!
 TI = mean(T,2);
 SI = mean(S,2);
 bI = g*alpha*TI-g*beta*SI;
-zwI = (zI(2:end)+zI(1:(end-1)))/2;
+zwI = avg(zI);
+
+%Kelvin wave B modes:
+P = sw_pres(-zI,0);
+KN2 = sw_bfrq(SI,sw_temp(SI,TI,P,0),P,lat);
+Kz = [-4000; zwI; 0;];
+KN2 = [KN2(1); KN2; KN2(end)];
+[Kc,KS,KC] = Bmodes(Kz,KN2,Kmod);
+Kc = Kc(Kmod);KS = KS(:,Kmod);KC=KC(:,Kmod);
+KS = interp1(Kz,KS,z_rho,'spline');
+KC = interp1(avg(Kz),KC,z_rho,'spline');
+KN2 = interp1(Kz,KN2,z_rho,'spline');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,6 +185,7 @@ BF_Y = zeros(Nz,1);
 BF_T = zeros(Nz,1);
 BF_S = zeros(Nz,1);
 
+%TIW forcing:
 if (rTIW==0) %idealized dv/dy
 eval(['dvdy = repmat(dvdy,[Nz 1]).*repmat(' dvdy_v ...
       ',[1 Nt]);']);
@@ -197,7 +204,16 @@ elseif (rTIW==1) %read dvdy from file dvdyFILE:
     end
 end
     
-eval(['PGF_X = ' num2str(PGF_X)]);
+%Wind-stress balancing PGF:
+eval(['PGF_X = ' num2str(PGF_X) ';']);
+
+%Kelvin wave forcing:
+Komega = 2*pi/Kperiod;
+PGF_K = -Kamp*Komega*real(i*exp(-i*Komega*repmat(t,[Nz 1])+i*Kpha)).*repmat(KC,[1 ...
+                    Nt]);
+KW = -Kamp*Komega*Kc/g*real(i*exp(-i*Komega*repmat(t,[Nz 1])+i* ...
+                                  Kpha)).*repmat(KS,[1 Nt]);
+
 %Intialize arrays:
 u = zeros(Nz,Nt);v = zeros(Nz,Nt);T = zeros(Nz,Nt);S = zeros(Nz,Nt);b = zeros(Nz,Nt);%z_rho variables
 kv = zeros(Nz+1,Nt);kt = zeros(Nz+1,Nt);ks = zeros(Nz+1,Nt);%z_w variables
@@ -262,15 +278,28 @@ for ti = 1:(length(t)-1)
         UDIV(:,ti) = dvdy(:,ti).*u(:,ti);
     end
     URST(:,ti) = -u_RST*(u(:,ti)-u(:,1));
-    UPGF(:,ti) = PGF_X;
-    TRST(:,ti) = -TS_RST*(T(:,ti)-T(:,1));
+    UPGF(:,ti) = PGF_X+PGF_K(:,ti);
+    TRST(:,ti) = -TS_RST*(T(:,ti)-Tvad(:,ti));
+    TVAD(:,ti) = -interp1(avg(z_rho),diff(T(:,ti))./diff(z_rho), ...
+                          z_rho,'spline').*KW(:,ti);
+    SVAD(:,ti) = -interp1(avg(z_rho),diff(S(:,ti))./diff(z_rho), ...
+                          z_rho,'spline').*KW(:,ti);
     
-    
+    if (~Vadv_only)
     BF_X = URST(:,ti)+UDIV(:,ti)+UPGF(:,ti);
-    BF_T = TRST(:,ti);
+    BF_T = TRST(:,ti)+TVAD(:,ti);
     BF_Y = -v_RST*(v(:,ti)-v(:,1));
-    BF_S = -TS_RST*(S(:,ti)-S(:,1));
-    
+    BF_S = -TS_RST*(S(:,ti)-Svad(:,ti))+SVAD(:,ti);
+    else %Apply only vertical advection
+    BF_X = 0*URST(:,ti);
+    BF_T = TVAD(:,ti);
+    BF_Y = 0*-v_RST*(v(:,ti)-v(:,1));
+    BF_S = SVAD(:,ti);
+    kv(:,ti) = 0;kt(:,ti) = 0;ks(:,ti) = 0;
+    gamv(:,ti) = 0;gamt(:,ti) = 0;gams(:,ti) = 0;
+    TAU_X(:) = 0;TAU_T(:) = 0;TAU_S(:) = 0;
+    end
+
     %Calculate step ti+1:
     [u(:,ti+1),UMFX(:,ti)] = Diff1Dstep(u(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_X/rho0,BF_X,Nz,dt);
     [v(:,ti+1),tmp] = Diff1Dstep(v(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_Y/rho0,BF_Y,Nz,dt);
@@ -281,7 +310,9 @@ for ti = 1:(length(t)-1)
     TTND(:,ti) = (T(:,ti+1)-T(:,ti))/dt;
 end
 
-save('RestoringTS_Sensitivity/PP_nDIR_nTIW_rst15.mat');
+%save('TIW_PP.mat');
+%save('Kelvin_vadvNUD.mat');
+% $$$ save('RestoringTS_Sensitivity/PP_nDIR_nTIW_rst15.mat');
 
 % $$$ Diff1Dcolplot;
 % $$$ ti = 1:(length(t)-1);

@@ -10,10 +10,12 @@ txtx = (t(end)/86400)*0.995;
 txty = -220;
 
 %Times to plot:
-[tmp tII] = min(abs(t/86400-135));
-[tmp tFF] = min(abs(t/86400-165));
+% $$$ [tmp tII] = min(abs(t/86400-135));
+% $$$ [tmp tFF] = min(abs(t/86400-165));
 % $$$ [tmp tII] = min(abs(t/86400));
 % $$$ [tmp tFF] = min(abs(t/86400-120));
+[tmp tII] = min(abs(t/86400-0));
+[tmp tFF] = min(abs(t/86400-1e5));
 tplot = 15;
 tvec = tII:tplot:tFF;
 
@@ -103,8 +105,8 @@ xtic = [0 0 0 0 0 1];
 VarOp{1} = {'dvdy','Tr','Zr'};
 VarOp{2} = {'DUDZ','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 VarOp{3} = {'N2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
-% $$$ VarOp{4} = {'RSh2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
-VarOp{4} = {'Ri','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
+VarOp{4} = {'RSh2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
+% $$$ VarOp{4} = {'Ri','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 VarOp{5} = {'kt','Tw','Zw'};
 VarOp{6} = {'Jq','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 caxs = [-3e-6 3e-6;...
