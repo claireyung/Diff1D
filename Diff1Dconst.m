@@ -7,14 +7,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL coordinates ROMS
-N = 50;
-h = 4000;
-Vtransform = 1;
-Vstretching = 1;
-theta_s = 5;
+N = 100;
+h = 1000;
+Vtransform = 2;
+Vstretching = 4;
+theta_s = 3;
 theta_b = 0;
-hc = 75;
-zbot = -300;
+hc = 100;
+zbot = -150;
 
 %Generate coordinates
 [z_rho,s_rho,Cs_rho] = scoord(h,0,0,Vtransform,Vstretching,theta_s,...
@@ -34,13 +34,16 @@ Hzw = z_rho(2:end)-z_rho(1:(end-1));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % GENERAL constants
-rho0 = 1025; %kg m-3
-alpha = 2.489e-4; %1/degC
-beta  = 7.453e-4; %1/psu
+%rho0 = 1025; %kg m-3
+rho0 = 1027; %Dan's ROMS value
+%alpha = 2.489e-4; %1/degC
+alpha = 1.7e-4; %Dan's ROMS value
+%beta  = 7.453e-4; %1/psu
+beta = 0; %Dan's ROMS value
 Cp = 4000; %J/kg/degC = m2 s-2 1/degC
 g = 9.81; %ms-2
-lat = 0; %Latitude
-f = 2*7.29e-5*sin(lat*pi/180); %Coriolis parameter
+          %lat = 0; %Latitude
+f = 1e-4;%2*7.29e-5*sin(lat*pi/180); %Coriolis parameter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SHORTWAVE absorption curve:
@@ -78,14 +81,14 @@ a0 = 0; a1 = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Peters 88 constants:
-K0_P88_L_m = 5.6e-8; %low Ri K0 for mom.
-K0_P88_L_s = 3.0e-9; %low Ri K0 for scl.
-EX_P88_L_m = -8.2; %low Ri exponent for mom.
-EX_P88_L_s = -9.6; %low Ri exponent for scl.
-
-K0_P88_U_m = 5e-4; %high Ri K0 for mom.
-K0_P88_U_s = 5e-4; %high Ri K0 for scls.
-EX_P88_U_m = -1.5; %high Ri exponent for mom.
-EX_P88_U_s = -2.5; %high Ri exponent for scl.
-Ri0_P88_m = 0.2; %decay scale high Ri for mom.
-Ri0_P88_s = 0.2; %decay scale high Ri for scls.
+% K0_P88_L_m = 5.6e-8; %low Ri K0 for mom.
+% K0_P88_L_s = 3.0e-9; %low Ri K0 for scl.
+% EX_P88_L_m = -8.2; %low Ri exponent for mom.
+% EX_P88_L_s = -9.6; %low Ri exponent for scl.
+% 
+% K0_P88_U_m = 5e-4; %high Ri K0 for mom.
+% K0_P88_U_s = 5e-4; %high Ri K0 for scls.
+% EX_P88_U_m = -1.5; %high Ri exponent for mom.
+% EX_P88_U_s = -2.5; %high Ri exponent for scl.
+% Ri0_P88_m = 0.2; %decay scale high Ri for mom.
+% Ri0_P88_s = 0.2; %decay scale high Ri for scls.

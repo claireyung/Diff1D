@@ -25,14 +25,14 @@ function [F,FRIC] = Diff1Dstep(Fp,kappa,gam,Hz,Hzw,FFlux,BForce,Nz,dt)
 %%%Centered 2nd-order:%%%
     
     % Calculate fluxes:
-    Flux = zeros(Nz+1,1);
-    Flux(2:(end-1)) = -kappa(2:(end-1)).*((Fp(2:end)-Fp(1:(end-1)))./Hzw-gam(2:(end-1)));
-    
+   Flux = [0; ...
+        -kappa(2:(end-1)).*((Fp(2:end)-Fp(1:(end-1)))./Hzw-gam(2:(end-1))); ...
+                       0];
+
     % Add forcing fluxes:
     Flux = Flux + FFlux;
-    
+
     % step forward field:
     FRIC = -(Flux(2:end)-Flux(1:(end-1)))./Hz;
     F = Fp + dt*FRIC+dt*BForce;
-    
 end
