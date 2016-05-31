@@ -1,0 +1,8 @@
+# .gitignore for Diff1D 1D Diffusion equation solver
+#
+
+# Ignore output formats:
+*.png
+*.mat
+*.pdf
+*.fig

@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
-load('KPP_nDIR_Ri0p8.mat');
+load('KPP_nDIR_Ri0p5.mat');
 
 %Setup limits:
 [tmp tII] = min(abs(t/86400-135));
@@ -19,43 +19,43 @@ tvec = tII:(tFF-1);
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nDIR_KPP = -kt.*dTdz*Cp*rho0;
-load('PP_nDIR_strun.mat');
+Jq_nDIR_KPP = kt.*dTdz*Cp*rho0;
+load('KPP_nDIR_Ri01.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nDIR_PP = -kt.*dTdz*Cp*rho0;
-load('KPP_nDIR_nTIW_Ri0p8.mat');
+Jq_nDIR_PP = kt.*dTdz*Cp*rho0;
+load('KPP_nDIR_nTIW_Ri0p5.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nDIR_nTIW_KPP = -kt.*dTdz*Cp*rho0;
-load('PP_nDIR_nTIW_strun.mat');
+Jq_nDIR_nTIW_KPP = kt.*dTdz*Cp*rho0;
+load('KPP_nDIR_nTIW_Ri01.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nDIR_nTIW_PP = -kt.*dTdz*Cp*rho0;
+Jq_nDIR_nTIW_PP = kt.*dTdz*Cp*rho0;
 %Diurnal
 load('KPP_Ri0p8.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_KPP = -kt.*dTdz*Cp*rho0;
+Jq_KPP = kt.*dTdz*Cp*rho0;
 load('PP_strun.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_PP = -kt.*dTdz*Cp*rho0;
+Jq_PP = kt.*dTdz*Cp*rho0;
 load('KPP_nTIW_Ri0p8.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nTIW_KPP = -kt.*dTdz*Cp*rho0;
+Jq_nTIW_KPP = kt.*dTdz*Cp*rho0;
 load('PP_nTIW_strun.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nTIW_PP = -kt.*dTdz*Cp*rho0;
+Jq_nTIW_PP = kt.*dTdz*Cp*rho0;
 
 %Plotting:
 %Setup figure:
@@ -65,14 +65,14 @@ set(gcf,'Position',[71 6 1845 999]);
 linetype = {'.','+','s','x'};
 dots = 720/4;
 linesize = [20 20 7 20];
-colors = {'k',[0.4941    0.1843    0.5569]};
+colors = {'k',[0    0.4471    0.7412]};%0.4941    0.1843    0.5569]};
 
 Jqplot1 = subplot('Position',[0.2512    0.3423    0.1854    0.5495]);
 xlabel('$J_q\,\,/\,\,$Wm$^{-2}$','FontSize',25);
 ylabel('Depth (m)','FontSize',25);
 set(gca,'xtick',[-200:100:0]);
 ylim([-150 0]);
-xlim([-270 0]);
+xlim([0 270]);
 box on;
 grid on;
 hold on;
@@ -83,7 +83,7 @@ set(gca,'ytick',[-150:50:0]);
 set(gca,'yticklabel',[]);
 set(gca,'xtick',[-200:100:0]);
 ylim([-150 0]);
-xlim([-270 0]);
+xlim([0 270]);
 box on;
 grid on;
 hold on;
@@ -104,7 +104,7 @@ nTIW1 = interp1(z',mean(Jq_nDIR_nTIW_KPP,2)',zF,'linear');
 TIW2 = interp1(z',mean(Jq_nDIR_PP,2)',zF,'linear');
 nTIW2 = interp1(z',mean(Jq_nDIR_nTIW_PP,2)',zF,'linear');
 
-POS1 = (TIW1-nTIW1)>0;POS2 = (TIW2-nTIW2)>0;
+POS1 = (TIW1-nTIW1)<0;POS2 = (TIW2-nTIW2)<0;
 %Separate blocks:
 blocks1=cell(1,1);sign1=zeros(1,1);cnt = 1;iini = 1;
 for zi=1:(length(zF)-1)
@@ -204,14 +204,14 @@ end
 %Legend and text:
 lg = legend('KPP TIW','PP TIW','KPP no TIW','PP no TIW');
 set(lg,'Position',[0.2540    0.3550    0.1125    0.0975]);
-text(-260,-5,'No Diurnal','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w');
-text(-260,-5,'Diurnal','FontSize',25,'Parent',Jqplot2, ...
-     'Backgroundcolor','w');
+text(260,-5,'No Diurnal','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w','HorizontalAlignment','right');
+text(260,-5,'Diurnal','FontSize',25,'Parent',Jqplot2, ...
+     'Backgroundcolor','w','HorizontalAlignment','right');
 
-text(-260,-145,'linear TIWs','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w');
-text(-260,-145,'linear TIWs','FontSize',25,'Parent',Jqplot2,'Backgroundcolor','w');
-text(-260,-145,'non-linear TIWs','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w');
-text(-260,-145,'non-linear TIWs','FontSize',25,'Parent',Jqplot2,'Backgroundcolor','w');
+text(260,-145,'linear TIWs','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w','HorizontalAlignment','right');
+text(260,-145,'linear TIWs','FontSize',25,'Parent',Jqplot2,'Backgroundcolor','w','HorizontalAlignment','right');
+text(260,-145,'non-linear TIWs','FontSize',25,'Parent',Jqplot1,'Backgroundcolor','w','HorizontalAlignment','right');
+text(260,-145,'non-linear TIWs','FontSize',25,'Parent',Jqplot2,'Backgroundcolor','w','HorizontalAlignment','right');
 % $$$ lg2 = subplot('Position',[0.99 0.01 0.01 0.01]);
 % $$$ hold on;
 % $$$ plot(0,0,'-k','LineWidth',2,'visible','off');

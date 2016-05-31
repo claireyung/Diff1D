@@ -27,7 +27,7 @@ DVDZ = (v(2:end,:)-v(1:(end-1),:))./repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 ...
 N2 = (b(2:end,:)-b(1:(end-1),:))./repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 ...
                     Nt]);
 RSh2 = DUDZ.^2+DVDZ.^2-4*N2;
-Ri = N2./(DUDZ.^2+DVDZ.^2);
+Ri = 1./(N2./(DUDZ.^2+DVDZ.^2));
 Jq = -kt(2:(end-1),:).*DTDZ*Cp*rho0;
 
 %Get EUC:
@@ -103,7 +103,8 @@ xtic = [0 0 0 0 0 1];
 VarOp{1} = {'dvdy','Tr','Zr'};
 VarOp{2} = {'DUDZ','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 VarOp{3} = {'N2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
-VarOp{4} = {'RSh2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
+% $$$ VarOp{4} = {'RSh2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
+VarOp{4} = {'Ri','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 VarOp{5} = {'kt','Tw','Zw'};
 VarOp{6} = {'Jq','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 caxs = [-3e-6 3e-6;...

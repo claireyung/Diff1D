@@ -81,7 +81,7 @@ end
 % proportional to the zonal velocity itself.
 
 %TS restoring:
-TS_RST = 1/(5*86400); %nudging coefficient (s-1)
+TS_RST = 1/(15*86400); %nudging coefficient (s-1)
 
 %u restoring:
 u_RST  = 1/(200000000*86400); %nudging coefficient (s-1)
@@ -116,7 +116,7 @@ dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
 %Interior:
 %0 = no interior, 1 = KPP, 2 = PP, 3 = PP88.
-INT = 1;
+INT = 2;
 
 %Background:
 kv0 = 1e-4; %m2s-1 interior background
@@ -124,8 +124,8 @@ kt0 = 1e-5; %m2s-1 interior background
 ks0 = 1e-5; %m2s-1 interior background
 
 % KPP 
-% $$$ Ri0 = 0.7; %Critical Richardson number
-Ri0 = 0.8; %Critical Richardson number
+Ri0 = 0.7; %Critical Richardson number
+% $$$ Ri0 = 1; %Critical Richardson number
 K0 = 2e-3; %Interior diffusivity maximum
 % $$$ K0 = 4e-3; %Interior diffusivity maximum
 
@@ -281,7 +281,7 @@ for ti = 1:(length(t)-1)
     TTND(:,ti) = (T(:,ti+1)-T(:,ti))/dt;
 end
 
-save('KPP_nDIR_nTIW_Ri0p8.mat');
+save('RestoringTS_Sensitivity/PP_nDIR_nTIW_rst15.mat');
 
 % $$$ Diff1Dcolplot;
 % $$$ ti = 1:(length(t)-1);
