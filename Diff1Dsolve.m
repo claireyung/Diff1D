@@ -43,10 +43,10 @@ out_folder = './'; %folder to save data to (will be labeled with
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
-dt = 120;
-tfin = 15*86400; %sec
+dt = 480;
+tfin = 180*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
-NOUT = 1; %output averaged every NOUT time steps.
+NOUT = 180; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
@@ -97,6 +97,14 @@ amplitude = 2.8e-6; %amplitude of stretching dv/dy.
 dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
 dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
+%Kelvin wave forcing:
+Kperiod = 60*86400; %period of oscillaiton (s)
+Kamp = 10; %amplitude (ms-1)
+Kpha = pi/2; %initial phase
+Kmod = 1; %Vertical mode number.
+load('TSvadv.mat');
+Vadv_only = 0;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL mixing
 
@@ -145,6 +153,17 @@ SI = mean(S,2);
 bI = g*alpha*TI-g*beta*SI;
 zwI = (zI(2:end)+zI(1:(end-1)))/2;
 
+%Kelvin wave B modes:
+P = sw_pres(-zI,0);
+KN2 = sw_bfrq(SI,sw_temp(SI,TI,P,0),P,lat);
+Kz = [-4000; zwI; 0;];
+KN2 = [KN2(1); KN2; KN2(end)];
+[Kc,KS,KC] = Bmodes(Kz,KN2,Kmod);
+Kc = Kc(Kmod);KS = KS(:,Kmod);KC=KC(:,Kmod);
+KS = interp1(Kz,KS,z_rho,'spline');
+KC = interp1(avg(Kz),KC,z_rho,'spline');
+KN2 = interp1(Kz,KN2,z_rho,'spline');
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,8 +177,16 @@ BF_Y = zeros(Nz,1);
 BF_T = zeros(Nz,1);
 BF_S = zeros(Nz,1);
 
+%TIW forcing:
 eval(['dvdy = repmat(dvdy,[Nz 1]).*repmat(' dvdy_v ...
       ',[1 Nt]);']);
+
+%Kelvin wave forcing:
+Komega = 2*pi/Kperiod;
+PGF_K = -Kamp*Komega*real(i*exp(-i*Komega*repmat(t,[Nz 1])+i*Kpha)).*repmat(KC,[1 ...
+                    Nt]);
+KW = -Kamp*Komega*Kc/g*real(i*exp(-i*Komega*repmat(t,[Nz 1])+i* ...
+                                  Kpha)).*repmat(KS,[1 Nt]);
 
 %Intialize arrays:
 u = zeros(Nz,Nt);v = zeros(Nz,Nt);T = zeros(Nz,Nt);
@@ -212,25 +239,28 @@ for ti = 1:(length(t)-1)
 
     %Vertical advection:
     UVAD = zeros(Nz+1,1);
-    UVAD(2:(end-1),:) = -diff(u(:,ti))./diff(z_rho).*w(2:(end-1),ti);
+    UVAD(2:(end-1)) = -diff(u(:,ti))./diff(z_rho).*w(2:(end-1),ti);
     UVAD = avg(UVAD);
     VVAD = zeros(Nz+1,1);
-    VVAD(2:(end-1),:) = -diff(v(:,ti))./diff(z_rho).*w(2:(end-1),ti);
+    VVAD(2:(end-1)) = -diff(v(:,ti))./diff(z_rho).*w(2:(end-1),ti);
     VVAD = avg(VVAD);
     TVAD = zeros(Nz+1,1);
-    TVAD(2:(end-1),:) = -diff(T(:,ti))./diff(z_rho).*w(2:(end-1),ti);
+    TVAD(2:(end-1)) = -diff(T(:,ti))./diff(z_rho).*w(2:(end-1),ti);
     TVAD = avg(TVAD);
+    SVAD = zeros(Nz+1,1);
+    SVAD(2:(end-1)) = -diff(S(:,ti))./diff(z_rho).*w(2:(end-1),ti);
+    SVAD = avg(SVAD);
     
     %Zonal pressure gradient:
-    UPGF = PGF_X;
+    UPGF = PGF_X + PGF_K(:,ti);
     
     %TIW Stretching:
     UDIV = dvdy(:,ti).*u(:,ti);
   
-    BF_X = URST+UPGF+UDIV;
-    BF_Y = VRST;
-    BF_T = TRST;
-    BF_S = SRST;
+    BF_X = URST+UPGF+UDIV+0*UVAD;
+    BF_Y = VRST+0*VVAD; % Vertical mom advection is zero!!!!!!!!!!!!!!
+    BF_T = TRST+TVAD;
+    BF_S = SRST+SVAD;
     
     %Calculate step ti+1:
     [u(:,ti+1),tmp] = Diff1Dstep(u(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_X/rho0,BF_X,Nz,dt);
