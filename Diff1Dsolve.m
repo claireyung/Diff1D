@@ -36,26 +36,29 @@ Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
 run = 1;
+out_folder = 'data/'; %folder to save data to (will be labeled with
+                      %run number). 
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
-dt = 30;
-tfin = 16*86400; %sec
+dt = 120;
+tfin = 86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
 NOUT = 1; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
-tau_x = 0.8*ones(size(t)); %Nm-2 = kg m-1 s-2
+tau_x = -0.08*ones(size(t)); %Nm-2 = kg m-1 s-2
 tau_y = 0*ones(size(t)); %Nm-2
 
 ssflux = 0*ones(size(t)); %psu kg-1 m-2 s-1
-shflux = 0*ones(size(t)); %surface heat flux (use srflux = 0 and shflux = total
+shflux = -180*ones(size(t)); %surface heat flux (use srflux = 0 and shflux = total
               %for all at surface). Wm-2 = J s-1 m-2 = kg s-3
 
 DIR = 0; %Include a diurnal cycle?
-srflux = 0; %radiative heat flux.
+srflux = 275; %radiative heat flux.
 if (DIR)
     hr = mod(t/3600,24);
     srflux = srflux*4*(cos((2*(hr/24)-1)*pi)).^2;
@@ -73,8 +76,18 @@ end
 
 %Depth independent nudging:
 TS_RST = 1/(15*86400); %nudging coefficient (s-1)
-u_RST  = 1/(2*86400); %nudging coefficient (s-1)
-v_RST  = 1/(2*86400); %nudging coefficient (s-1)
+u_RST  = 1/(200000000*86400); %nudging coefficient (s-1)
+v_RST  = 1/(200000000*86400); %nudging coefficient (s-1)
+
+%Pressure-gradient force for EUC:
+PGFscale = 120; %depth scale of cubic gaussian.
+%set equal to wind stress:
+PGFamp = -tau_x(1)/rho0/trapz(-10000:0.1:0,exp(-(-(-10000:0.1:0)/PGFscale).^3));
+%PGFamp = 3.2e-7; %Value of PGF at surface
+PGF_X = PGFamp.*exp(-(-z_rho/PGFscale).^3);
+
+%Vertical advection:
+w = zeros(Nz+1,Nt);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL mixing
@@ -88,35 +101,39 @@ kv0 = 1e-4; %m2s-1 interior background
 kt0 = 1e-5; %m2s-1 interior background
 ks0 = 1e-5; %m2s-1 interior background
 
-% KPP 
-Ri0 = 0.7; %Critical Richardson number
-K0 = 2e-3; %Interior diffusivity maximum
+if (INT==1)     % KPP 
+    Ri0 = 0.7; %Critical Richardson number
+    K0 = 2e-3; %Interior diffusivity maximum
 
-%PP parameters:
-%Ri0_PP = 0.2; %Decay scale
-%K0_PP = 0.01; %max int. diff.
-%PR = 0;      %PR = 1; PP1 parameterization with Pr=1.
-              %PR = 0; normal PP parametrization
-              %PR = 2; PP1.2 parametrization, where kv is set to
-              %kt.
+elseif (INT == 2) %PP
+    Ri0_PP = 0.2; %Decay scale
+    K0_PP = 0.01; %max int. diff.
+    PR = 0;      %PR = 1; PP1 parameterization with Pr=1.
+                 %PR = 0; normal PP parametrization
+                 %PR = 2; PP1.2 parametrization, where kv is set to
+                 %kt.
 
-%P88 parameters: %contained in Diff1Dconst.m
+elseif (INT == 3)
+    %P88 parameters: %contained in Diff1Dconst.m
+    P88_Kmax = 0.1;
+end
 
 %Boundary layer:
 KPPBL = 1; %use boundary layer mixing.
 EKMO = 1; %use Ekman/MO length restrictions.
 nl = 1; %use non-local fluxes?
-KPPMLD = -20; %Initial guess mixed layer.
+KPPMLD = -15; %Initial guess mixed layer.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % INITIAL conditions
 
-% Initial temperature profile: 
-zI = -190:20:-10;
-uI = 0*zI;
-vI = 0*zI;
-TI = linspace(10,30,length(zI));
-SI = 35*ones(size(zI));
+% Initial profiles from mean BMIX profiles:
+load('BMIX_140W_TS.mat');
+zI = mean(Z,2);
+uI = mean(U,2);
+vI = mean(V,2)*0; %SET TO ZERO!!!
+TI = mean(T,2);
+SI = mean(S,2);
 bI = g*alpha*TI-g*beta*SI;
 zwI = (zI(2:end)+zI(1:(end-1)))/2;
 
@@ -192,8 +209,11 @@ for ti = 1:(length(t)-1)
     TVAD = zeros(Nz+1,1);
     TVAD(2:(end-1),:) = -diff(T(:,ti))./diff(z_rho).*w(2:(end-1),ti);
     TVAD = avg(TVAD);
+    
+    %Zonal pressure gradient:
+    UPGF = PGF_X;
   
-    BF_X = URST;
+    BF_X = URST+UPGF;
     BF_Y = VRST;
     BF_T = TRST;
     BF_S = SRST;
@@ -211,5 +231,8 @@ for ti = 1:(length(t)-1)
 end
 
 Diff1Dredout;
-save(sprintf('data/run_%03d.mat',run));
+if (exist(out_folder)==7)
+    ['Saving run ' num2str(run) ' to folder ' out_folder]
+    save(sprintf('data/run_%03d.mat',run));
+end
 

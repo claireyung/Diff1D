@@ -2,7 +2,7 @@ figure;
 set(gcf,'Position',[453 26 1006 947]);
 [Tr,Zr] = meshgrid(t/86400,z_rho);
 [Tw,Zw] = meshgrid(t/86400,z_w);
-axs = [0 t(end)/86400 z_rho(1) 0];
+axs = [0 t(end)/86400 -200 0];
 intp = 0;
 lnfilt = 0;
 txtx = axs(2)*0.995;

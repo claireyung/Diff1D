@@ -7,14 +7,14 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL coordinates ROMS
-N = 100;
-h = 1000;
-Vtransform = 2;
-Vstretching = 4;
-theta_s = 3;
+N = 50;
+h = 4000;
+Vtransform = 1;
+Vstretching = 1;
+theta_s = 5;
 theta_b = 0;
-hc = 100;
-zbot = -150;
+hc = 75;
+zbot = -300;
 
 %Generate coordinates
 [z_rho,s_rho,Cs_rho] = scoord(h,0,0,Vtransform,Vstretching,theta_s,...
@@ -39,8 +39,8 @@ alpha = 2.489e-4; %1/degC
 beta  = 7.453e-4; %1/psu
 Cp = 4000; %J/kg/degC = m2 s-2 1/degC
 g = 9.81; %ms-2
-          %lat = 0; %Latitude
-f = 1e-4;%2*7.29e-5*sin(lat*pi/180); %Coriolis parameter
+lat = 0; %Latitude
+f = 2*7.29e-5*sin(lat*pi/180); %Coriolis parameter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SHORTWAVE absorption curve:
