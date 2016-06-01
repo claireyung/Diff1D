@@ -234,8 +234,8 @@ for ti = 1:(length(t)-1)
     %depth-independent restoring:
     URST = -u_RST*(u(:,ti)-u(:,1));
     VRST = -v_RST*(v(:,ti)-v(:,1));
-    TRST = -TS_RST*(T(:,ti)-T(:,1));
-    SRST = -TS_RST*(S(:,ti)-S(:,1));
+    TRST = -TS_RST*(T(:,ti)-Tvad(:,ti));
+    SRST = -TS_RST*(S(:,ti)-Svad(:,ti));
 
     %Vertical advection:
     UVAD = zeros(Nz+1,1);
