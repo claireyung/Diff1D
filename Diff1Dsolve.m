@@ -44,7 +44,7 @@ out_folder = 'data/'; %folder to save data to (will be labeled with
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
 dt = 120;
-tfin = 86400; %sec
+tfin = 15*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
 NOUT = 1; %output averaged every NOUT time steps.
 
@@ -88,6 +88,14 @@ PGF_X = PGFamp.*exp(-(-z_rho/PGFscale).^3);
 
 %Vertical advection:
 w = zeros(Nz+1,Nt);
+
+%TIW forcing:
+SYM = 0; %0 -> body force is dvdy*u
+         %1 -> body force is dvdy*u_initial
+period = 15*86400; %peroid of oscillation (s)
+amplitude = 0;%2.8e-6; %amplitude of stretching dv/dy.
+dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
+dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL mixing
@@ -149,6 +157,9 @@ BF_X = zeros(Nz,1);
 BF_Y = zeros(Nz,1);
 BF_T = zeros(Nz,1);
 BF_S = zeros(Nz,1);
+
+eval(['dvdy = repmat(dvdy,[Nz 1]).*repmat(' dvdy_v ...
+      ',[1 Nt]);']);
 
 %Intialize arrays:
 u = zeros(Nz,Nt);v = zeros(Nz,Nt);T = zeros(Nz,Nt);
@@ -212,8 +223,11 @@ for ti = 1:(length(t)-1)
     
     %Zonal pressure gradient:
     UPGF = PGF_X;
+    
+    %TIW Stretching:
+    UDIV = dvdy(:,ti).*u(:,ti);
   
-    BF_X = URST+UPGF;
+    BF_X = URST+UPGF+UDIV;
     BF_Y = VRST;
     BF_T = TRST;
     BF_S = SRST;
