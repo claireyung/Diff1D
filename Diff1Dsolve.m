@@ -44,7 +44,7 @@ Diff1Dconst;
 % TIME stepping 
 dt = 120;
 % $$$ tfin = 120*86400;%30*86400; %sec
-tfin = 12*15*86400;%30*86400; %sec
+tfin = 15*86400;%30*86400; %sec
 tplot = 720/4; %plot every tplot slices.
 meanplot = 0; %plot mean curves on left of pcolor plots.
 % $$$ pplot = 0; %plot profiles as code runs
@@ -116,7 +116,7 @@ dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
 %Interior:
 %0 = no interior, 1 = KPP, 2 = PP, 3 = PP88.
-INT = 2;
+INT = 1;
 
 %Background:
 kv0 = 1e-4; %m2s-1 interior background
@@ -281,7 +281,7 @@ for ti = 1:(length(t)-1)
     TTND(:,ti) = (T(:,ti+1)-T(:,ti))/dt;
 end
 
-save('RestoringTS_Sensitivity/PP_nDIR_nTIW_rst15.mat');
+save('noTIW_master_check.mat');
 
 % $$$ Diff1Dcolplot;
 % $$$ ti = 1:(length(t)-1);
