@@ -219,12 +219,9 @@ for ti = 1:(length(t)-1)
     BF_S = SRST;
     
     %Calculate step ti+1:
-    [u(:,ti+1),tmp] = Diff1Dstep(u(:,ti),kv(:,ti), ...
-                                 zeros(Nz+1,1),Hz,Hzw,-TAU_X/rho0,BF_X,Nz,dt);
-    [v(:,ti+1),tmp] = Diff1Dstep(v(:,ti),kv(:,ti), ...
-                                 zeros(Nz+1,1),Hz,Hzw,-TAU_Y/rho0,BF_Y,Nz,dt);
-    [T(:,ti+1),tmp] = Diff1Dstep(T(:,ti),kt(:,ti), ...
-                                 zeros(Nz+1,1),Hz,Hzw,-TAU_T/rho0,BF_T,Nz,dt);
+    [u(:,ti+1),tmp] = Diff1Dstep(u(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_X/rho0,BF_X,Nz,dt);
+    [v(:,ti+1),tmp] = Diff1Dstep(v(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_Y/rho0,BF_Y,Nz,dt);
+    [T(:,ti+1),tmp] = Diff1Dstep(T(:,ti),kt(:,ti),gamt(:,ti),Hz,Hzw,-TAU_T/rho0,BF_T,Nz,dt);
     [S(:,ti+1),tmp] = Diff1Dstep(S(:,ti),ks(:,ti),gams(:,ti),Hz,Hzw,-TAU_S/rho0,BF_S,Nz,dt);
     b(:,ti+1) = g*alpha*T(:,ti+1)-g*beta*S(:,ti+1);
 

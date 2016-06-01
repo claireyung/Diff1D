@@ -167,9 +167,6 @@ LB = interp1(z_w,L,KPPMLD);
 if (EKMO & LB>0)
     KPPMLD = -min([-KPPMLD hekman LB]);
 end
-if (EKMO)
-    KPPMLD = -min([-KPPMLD hekman]);
-end
 
 %Restrict to be greater than the minimum z_rho:
 KPPMLD = min([KPPMLD max(z_rho)]);
@@ -233,9 +230,6 @@ G1s = ksN/(-KPPMLD*wsN);
 G1vDZ = -kvDZN/wmN-kvN*wmDZN/(-KPPMLD*wmN^2);
 G1tDZ = -ktDZN/wsN-ktN*wsDZN/(-KPPMLD*wsN^2);
 G1sDZ = -ksDZN/wsN-ksN*wsDZN/(-KPPMLD*wsN^2);
-G1vDZ = -kvDZN/wmN; %NOBF
-G1tDZ = -ktDZN/wsN; %NOBF
-G1sDZ = -ksDZN/wsN; %NOBF
 
 %Calculate shape function coefficients:
 a2v = -2+3*G1v-G1vDZ;
