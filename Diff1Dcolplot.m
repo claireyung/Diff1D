@@ -2,8 +2,7 @@ figure;
 set(gcf,'Position',[453 26 1006 947]);
 [Tr,Zr] = meshgrid(t/86400,z_rho);
 [Tw,Zw] = meshgrid(t/86400,z_w);
-axs = [0 t(end)/86400 -100 0];
-%axs = [4.4 4.75 -80 -30];
+axs = [0 t(end)/86400 z_rho(1) 0];
 intp = 0;
 lnfilt = 0;
 txtx = axs(2)*0.995;
@@ -15,9 +14,6 @@ meanplot = 0; %plot mean curves on left of pcolor plots.
 [tmp tII] = min(abs(t/86400-0));
 [tmp tFF] = min(abs(t/86400-50000));
 ntpts = 400;
-% $$$ [tmp tII] = min(abs(t/86400-4));
-% $$$ [tmp tFF] = min(abs(t/86400-7));
-% $$$ ntpts = 400;
 if (ntpts<(tFF-tII+1))
     tvec = round(linspace(tII,tFF,ntpts));
 else
@@ -58,18 +54,6 @@ names{2} = '$u\,\,/\,\,$ms$^{-1}$';
 VarOp{3} = {'v','Tr','Zr'};
 caxs(3,:) = [-0.1 0.1];
 names{3} = '$v\,\,/\,\,$ms$^{-1}$';
-% $$$ %Variable 1:
-% $$$ VarOp{1} = {'bulkRiD','Tw','Zw'};
-% $$$ caxs(1,:) = [0 0.01];
-% $$$ names{1} = 'bulk Ri Denominator';
-% $$$ %Variable 2:
-% $$$ VarOp{2} = {'bulkRiN','Tw','Zw'};
-% $$$ caxs(2,:) = [0 0.05];
-% $$$ names{2} = 'bulk Ri Numerator';
-% $$$ %Variable 3:
-% $$$ VarOp{3} = {'Tadv','Tr','Zr'};
-% $$$ caxs(3,:) = [-1 1]*1e-6;
-% $$$ names{3} = '$T_{adv}\,\,/\,\,^\circ$Cs$^{-1}$';
 %Variable 4:
 VarOp{4} = {'N2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
 caxs(4,:) = [0 4.5e-5];
@@ -130,10 +114,7 @@ if (~xtic(sp))
 else
     set(gca,'xticklabel',{[],[],[],0,5,10,15,20,25,30});
 end
-% $$$ set(gca,'xticklabel',{caxs(sp,1),mean(caxs(sp,:)),caxs(sp,2),[],[],[],[],[],[],[]});
 hold on;
-% $$$ plot([-6 -6],[axs(3) axs(4)],'-k');
-% $$$ plot([-1 -1],[axs(3) axs(4)],'-k');
 plot((mean(Var,2)-mean(caxs(sp,:)))/(caxs(sp,2)-caxs(sp,1))*5-3.5,mean(Y,2),'-k','LineWidth',2);
 plot((zeros(size(mean(Var,2)))-mean(caxs(sp,:)))/(caxs(sp,2)-caxs(sp,1))*5-3.5,mean(Y,2),'-k');
 end

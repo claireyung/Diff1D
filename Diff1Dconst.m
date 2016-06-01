@@ -34,12 +34,9 @@ Hzw = z_rho(2:end)-z_rho(1:(end-1));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % GENERAL constants
-%rho0 = 1025; %kg m-3
-rho0 = 1027; %Dan's ROMS value
-%alpha = 2.489e-4; %1/degC
-alpha = 1.7e-4; %Dan's ROMS value
-%beta  = 7.453e-4; %1/psu
-beta = 0; %Dan's ROMS value
+rho0 = 1025; %kg m-3
+alpha = 2.489e-4; %1/degC
+beta  = 7.453e-4; %1/psu
 Cp = 4000; %J/kg/degC = m2 s-2 1/degC
 g = 9.81; %ms-2
           %lat = 0; %Latitude
