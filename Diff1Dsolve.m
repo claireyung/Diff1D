@@ -46,7 +46,7 @@ out_folder = './'; %folder to save data to (will be labeled with
 dt = 480;
 tfin = 180*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
-NOUT = 180; %output averaged every NOUT time steps.
+NOUT = 1; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
