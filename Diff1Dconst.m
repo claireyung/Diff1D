@@ -78,14 +78,14 @@ a0 = 0; a1 = 1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Peters 88 constants:
-K0_P88_L_m = 5.6e-8; %low Ri K0 for mom.
-K0_P88_L_s = 3.0e-9; %low Ri K0 for scl.
-EX_P88_L_m = -8.2; %low Ri exponent for mom.
-EX_P88_L_s = -9.6; %low Ri exponent for scl.
-
-K0_P88_U_m = 5e-4; %high Ri K0 for mom.
-K0_P88_U_s = 5e-4; %high Ri K0 for scls.
-EX_P88_U_m = -1.5; %high Ri exponent for mom.
-EX_P88_U_s = -2.5; %high Ri exponent for scl.
-Ri0_P88_m = 0.2; %decay scale high Ri for mom.
-Ri0_P88_s = 0.2; %decay scale high Ri for scls.
+% K0_P88_L_m = 5.6e-8; %low Ri K0 for mom.
+% K0_P88_L_s = 3.0e-9; %low Ri K0 for scl.
+% EX_P88_L_m = -8.2; %low Ri exponent for mom.
+% EX_P88_L_s = -9.6; %low Ri exponent for scl.
+% 
+% K0_P88_U_m = 5e-4; %high Ri K0 for mom.
+% K0_P88_U_s = 5e-4; %high Ri K0 for scls.
+% EX_P88_U_m = -1.5; %high Ri exponent for mom.
+% EX_P88_U_s = -2.5; %high Ri exponent for scl.
+% Ri0_P88_m = 0.2; %decay scale high Ri for mom.
+% Ri0_P88_s = 0.2; %decay scale high Ri for scls.

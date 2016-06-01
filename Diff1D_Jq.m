@@ -3,13 +3,11 @@
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
-load('KPP_nDIR_Ri0p5.mat');
+load('None_PP.mat');
 
 %Setup limits:
-[tmp tII] = min(abs(t/86400-135));
-[tmp tFF] = min(abs(t/86400-165));
-% $$$ [tmp tII] = min(abs(t/86400));
-% $$$ [tmp tFF] = min(abs(t/86400-120));
+[tmp tII] = min(abs(t/86400-60));
+[tmp tFF] = min(abs(t/86400-120));
 z = z_w(2:(end-1));
 [tmp indtop] = min(abs(z+50));
 [tmp indbot] = min(abs(z+150));
@@ -20,42 +18,21 @@ kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
 Jq_nDIR_KPP = kt.*dTdz*Cp*rho0;
-load('KPP_nDIR_Ri01.mat');
+load('Kelvin_nTIW_PP.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
 Jq_nDIR_PP = kt.*dTdz*Cp*rho0;
-load('KPP_nDIR_nTIW_Ri0p5.mat');
+load('TIW_PP.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
 Jq_nDIR_nTIW_KPP = kt.*dTdz*Cp*rho0;
-load('KPP_nDIR_nTIW_Ri01.mat');
+load('Kelvin_vadvNUD.mat');
 kt = kt(2:(end-1),tvec);
 dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
     repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
 Jq_nDIR_nTIW_PP = kt.*dTdz*Cp*rho0;
-%Diurnal
-load('KPP_Ri0p8.mat');
-kt = kt(2:(end-1),tvec);
-dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
-    repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_KPP = kt.*dTdz*Cp*rho0;
-load('PP_strun.mat');
-kt = kt(2:(end-1),tvec);
-dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
-    repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_PP = kt.*dTdz*Cp*rho0;
-load('KPP_nTIW_Ri0p8.mat');
-kt = kt(2:(end-1),tvec);
-dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
-    repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nTIW_KPP = kt.*dTdz*Cp*rho0;
-load('PP_nTIW_strun.mat');
-kt = kt(2:(end-1),tvec);
-dTdz = (T(2:end,tvec)-T(1:(end-1),tvec))./...
-    repmat(z_rho(2:end)-z_rho(1:(end-1)),[1 length(tvec)]);
-Jq_nTIW_PP = kt.*dTdz*Cp*rho0;
 
 %Plotting:
 %Setup figure:
@@ -89,13 +66,13 @@ grid on;
 hold on;
 
 plot(mean(Jq_nDIR_KPP,2),z,'-','LineWidth',3,'color', ...
-     colors{1},'Parent',Jqplot1);
+     colors{1});%,Jqplot1);
 plot(mean(Jq_nDIR_PP,2),z,'-','LineWidth',3,'color', ...
-     colors{2},'Parent',Jqplot1);
+     colors{2});%,Jqplot1);
 plot(mean(Jq_nDIR_nTIW_KPP,2),z,'--','LineWidth',3,'color', ...
-     colors{1},'Parent',Jqplot1);
+     colors{1});%,Jqplot1);
 plot(mean(Jq_nDIR_nTIW_PP,2),z,'--','LineWidth',3,'color', ...
-     colors{2},'Parent',Jqplot1);
+     colors{2});%,Jqplot1);
 %Fill:
 fcolors = {[0.7294    0.8314    0.9569],[ 0.9569  0.8314 0.7294]};
 zF = z(1):1:z(end);

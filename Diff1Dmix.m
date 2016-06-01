@@ -110,7 +110,7 @@ end
 % BOUNDARY layer KPP Mixing
 
 if (KPPBL)
-
+    
 %radiative flux at depth z:
 wr = zeros(size(z_w));
 for zi=1:length(z_w)
@@ -151,9 +151,10 @@ ws(cond) = vonKar*Ustar*(as-cs*zeta_t(cond)).^(-1/3);
 bw = interp1(z_rho,b(:,ti),z_w,'spline'); %w-points
 uw = interp1(z_rho,u(:,ti),z_w,'spline');
 vw = interp1(z_rho,v(:,ti),z_w,'spline');
-RiKPP = -(bw(end)-bw).*z_w./((uw(end)-uw).^2+...
-                             (vw(end)-vw).^2+Vtc*(-z_w).*ws.* ...
-                             sqrt(abs(N2)));
+RiKPP_Numer = -(bw(end)-bw).*z_w;
+RiKPP_Denom = (uw(end)-uw).^2+(vw(end)-vw).^2+Vtc*(-z_w).*ws.* ...
+                             sqrt(abs(N2));
+RiKPP = RiKPP_Numer./RiKPP_Denom;
 RiKPP(end) = 0;
 
 %Interpolate to find MLD:
@@ -250,11 +251,11 @@ ks(sig<1 & sig>0,ti) = (-KPPMLD)*ws(sig<1 & sig>0).*Gs(sig<1 & sig>0);
 
 %Calculate non-local transports:
 if (nl)
-gams(zeta<0,ti) = Cstar*vonKar*(cs*vonKar*epsl)^(1/3)*ws0./(ws(zeta<0)*(-KPPMLD)+small);
-gamt(zeta<0,ti) = Cstar*vonKar*(cs*vonKar*epsl)^(1/3)*(wt0+wr(zeta< ...
+    gams(zeta<0,ti) = Cstar*vonKar*(cs*vonKar*epsl)^(1/3)*ws0./(ws(zeta<0)*(-KPPMLD)+small);
+    gamt(zeta<0,ti) = Cstar*vonKar*(cs*vonKar*epsl)^(1/3)*(wt0+wr(zeta< ...
                                                   0))./(ws(zeta<0)*(-KPPMLD)+small);
-gams(sig>1 | sig<0,ti) = 0;
-gamt(sig>1 | sig<0,ti) = 0;
+    gams(sig>1 | sig<0,ti) = 0;
+    gamt(sig>1 | sig<0,ti) = 0;
 end
 
 end
