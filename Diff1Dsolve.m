@@ -36,7 +36,7 @@ Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
 run = 1;
-out_folder = 'data/'; %folder to save data to (will be labeled with
+out_folder = './'; %folder to save data to (will be labeled with
                       %run number). 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +93,7 @@ w = zeros(Nz+1,Nt);
 SYM = 0; %0 -> body force is dvdy*u
          %1 -> body force is dvdy*u_initial
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 0;%2.8e-6; %amplitude of stretching dv/dy.
+amplitude = 2.8e-6; %amplitude of stretching dv/dy.
 dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
 dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
@@ -242,8 +242,8 @@ for ti = 1:(length(t)-1)
 end
 
 Diff1Dredout;
-if (exist(out_folder)==7)
+if (exist(out_folder)==7 | exist(out_folder)==5)
     ['Saving run ' num2str(run) ' to folder ' out_folder]
-    save(sprintf('data/run_%03d.mat',run));
+    save(sprintf([out_folder 'run_%03d.mat'],run));
 end
 

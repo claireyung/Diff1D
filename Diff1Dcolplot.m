@@ -2,11 +2,12 @@ figure;
 set(gcf,'Position',[453 26 1006 947]);
 [Tr,Zr] = meshgrid(t/86400,z_rho);
 [Tw,Zw] = meshgrid(t/86400,z_w);
-axs = [0 t(end)/86400 -200 0];
+axs = [0 t(end)/86400 -300 0];
 intp = 0;
 lnfilt = 0;
 txtx = axs(2)*0.995;
-txty = axs(3)+2;
+txty = axs(3)+15;
+isp = [0:0.3:40];
 
 meanplot = 0; %plot mean curves on left of pcolor plots.
 
@@ -44,19 +45,19 @@ caxs = [];
 names = {};
 %Variable 1:
 VarOp{1} = {'T','Tr','Zr'};
-caxs(1,:) = [21 22.25];
+caxs(1,:) = [15 24];
 names{1} = '$T\,\,/\,\,^\circ$C';
 %Variable 2:
 VarOp{2} = {'u','Tr','Zr'};
-caxs(2,:) = [-0.1 0.1];
+caxs(2,:) = [-1.5 1.5];
 names{2} = '$u\,\,/\,\,$ms$^{-1}$';
 %Variable 3:
-VarOp{3} = {'v','Tr','Zr'};
-caxs(3,:) = [-0.1 0.1];
-names{3} = '$v\,\,/\,\,$ms$^{-1}$';
+VarOp{3} = {'S','Tr','Zr'};
+caxs(3,:) = [34.8 35.2];
+names{3} = '$S\,\,/\,\,psu$';
 %Variable 4:
 VarOp{4} = {'N2','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
-caxs(4,:) = [0 4.5e-5];
+caxs(4,:) = [0 1e-4];
 names{4} = 'N$^2\,\,/\,\,$s$^{-2}$';
 %Variable 5:
 VarOp{5} = {'RiInv','Tw(2:(end-1),:)','Zw(2:(end-1),:)'};
@@ -85,7 +86,7 @@ else
     pcolPlot(X(:,tvec),Y(:,tvec),Var(:,tvec));
 end
 hold on;
-contour(Tr(:,tvec),Zr(:,tvec),Bft(:,tvec),-g/rho0*[0:0.05:40],'-k');
+contour(Tr(:,tvec),Zr(:,tvec),Bft(:,tvec),-g/rho0*isp,'-k');
 caxis(caxs(sp,:));
 plot(t(tvec)/86400,Hsbl(tvec),'-','Color',[1 1 1],'LineWidth',2);
 axis(axs);
