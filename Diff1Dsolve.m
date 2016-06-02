@@ -36,17 +36,18 @@ Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
 run = 1;
-out_folder = './'; %folder to save data to (will be labeled with
+out_folder = 'Kelvin/'; %folder to save data to (will be labeled with
                       %run number). 
+suffix = 'noTIW';
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
 dt = 480;
-tfin = 180*86400; %sec
+tfin = 30*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
-NOUT = 1; %output averaged every NOUT time steps.
+NOUT = 10; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
@@ -88,12 +89,23 @@ PGF_X = PGFamp.*exp(-(-z_rho/PGFscale).^3);
 
 %Vertical advection:
 w = zeros(Nz+1,Nt);
+VADV_TS = 1; %Turn on vertical advection of T and S.
+VADV_UV = 0; %Turn on vertical advection of U and V.
+
+VADV_ONLY = 0; %Run with only vertical advection (for getting T-S
+               %fields to nudge to in Kelvin wave
+               %simulations)
+
+if (VADV_ONLY ~= 1)% If not running with VADV_ONLY
+    % Load VADV_ONLY T, S to nudge too:
+    load(sprintf([out_folder 'VADV_ONLY_run_%03d.mat'],run));
+end
 
 %TIW forcing:
 SYM = 0; %0 -> body force is dvdy*u
          %1 -> body force is dvdy*u_initial
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 2.8e-6; %amplitude of stretching dv/dy.
+amplitude = 0;%2.8e-6; %amplitude of stretching dv/dy.
 dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
 dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
@@ -102,8 +114,7 @@ Kperiod = 60*86400; %period of oscillaiton (s)
 Kamp = 10; %amplitude (ms-1)
 Kpha = pi/2; %initial phase
 Kmod = 1; %Vertical mode number.
-load('TSvadv.mat');
-Vadv_only = 0;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VERTICAL mixing
@@ -171,12 +182,6 @@ KN2 = interp1(Kz,KN2,z_rho,'spline');
 
 % SETUP 
 
-%Initial body-forces:
-BF_X = zeros(Nz,1);
-BF_Y = zeros(Nz,1);
-BF_T = zeros(Nz,1);
-BF_S = zeros(Nz,1);
-
 %TIW forcing:
 eval(['dvdy = repmat(dvdy,[Nz 1]).*repmat(' dvdy_v ...
       ',[1 Nt]);']);
@@ -207,35 +212,6 @@ for ti = 1:(length(t)-1)
     if (mod(ti,50)==0)
     ['Doing step ' num2str(ti) ' of ' num2str(length(t)-1)]
     end
-    
-    %Calculate mixing parameters from time dependent forcing:
-    Ustar = sqrt(sqrt(tau_x(ti).^2+tau_y(ti).^2)/rho0); %Friction velocity (const).
-    hekman = 0.7*Ustar/max(abs([f 1e-10])); %Ekman depth
-    wt0 = shflux(ti)/Cp/rho0;
-    ws0 = ssflux(ti)/rho0;
-            
-    %Calculate diffusivities:
-    Diff1Dmix; 
-    bulkRiN(:,ti) = RiKPP_Numer;
-    bulkRiD(:,ti) = RiKPP_Denom;
-    
-    %Calculate heat flux down:
-    TAU_T = [zeros(Nz,1); shflux(ti)/Cp];
-    for zi = 1:length(z_w)
-        TAU_T(zi) = TAU_T(zi)+srflux(ti)/Cp*swdk(z_w(zi)); %degC kg m-2 s-1 = degC s-1 m * rho0
-    end
-    
-    %Calculate momentum and salinity fluxes:
-    TAU_X = [zeros(Nz,1); tau_x(ti)];
-    TAU_Y = [zeros(Nz,1); tau_y(ti)];
-    TAU_S = [zeros(Nz,1); ssflux(ti)];
-
-    %Calculate body forces:
-    %depth-independent restoring:
-    URST = -u_RST*(u(:,ti)-u(:,1));
-    VRST = -v_RST*(v(:,ti)-v(:,1));
-    TRST = -TS_RST*(T(:,ti)-Tvad(:,ti));
-    SRST = -TS_RST*(S(:,ti)-Svad(:,ti));
 
     %Vertical advection:
     UVAD = zeros(Nz+1,1);
@@ -250,17 +226,58 @@ for ti = 1:(length(t)-1)
     SVAD = zeros(Nz+1,1);
     SVAD(2:(end-1)) = -diff(S(:,ti))./diff(z_rho).*w(2:(end-1),ti);
     SVAD = avg(SVAD);
+
+    if (VADV_ONLY == 1) %ONLY VERTICAL ADVECTION ---------------------
+        BF_X = VADV_UV*UVAD;
+        BF_Y = VADV_UV*VVAD;
+        BF_T = VADV_TS*TVAD;
+        BF_S = VADV_TS*SVAD;
+        TAU_X = zeros(Nz+1,1);TAU_Y=TAU_X; TAU_T=TAU_X;TAU_S=TAU_X;
+        kv(:,ti) = 0;kt(:,ti) = 0;ks(:,ti) = 0;
     
-    %Zonal pressure gradient:
-    UPGF = PGF_X + PGF_K(:,ti);
+    else % EVERYTHING ------------------------------------------------
+
+        %Calculate mixing parameters from time dependent forcing:
+        Ustar = sqrt(sqrt(tau_x(ti).^2+tau_y(ti).^2)/rho0); %Friction velocity (const).
+        hekman = 0.7*Ustar/max(abs([f 1e-10])); %Ekman depth
+        wt0 = shflux(ti)/Cp/rho0;
+        ws0 = ssflux(ti)/rho0;
+            
+        %Calculate diffusivities:
+        Diff1Dmix; 
+        bulkRiN(:,ti) = RiKPP_Numer;
+        bulkRiD(:,ti) = RiKPP_Denom;
     
-    %TIW Stretching:
-    UDIV = dvdy(:,ti).*u(:,ti);
+        %Calculate heat flux down:
+        TAU_T = [zeros(Nz,1); shflux(ti)/Cp];
+        for zi = 1:length(z_w)
+            TAU_T(zi) = TAU_T(zi)+srflux(ti)/Cp*swdk(z_w(zi)); %degC kg m-2 s-1 = degC s-1 m * rho0
+        end
+    
+        %Calculate momentum and salinity fluxes:
+        TAU_X = [zeros(Nz,1); tau_x(ti)];
+        TAU_Y = [zeros(Nz,1); tau_y(ti)];
+        TAU_S = [zeros(Nz,1); ssflux(ti)];
+
+        %Calculate body forces:
+
+        %depth-independent restoring:
+        URST = -u_RST*(u(:,ti)-u(:,1));
+        VRST = -v_RST*(v(:,ti)-v(:,1));
+        TRST = -TS_RST*(T(:,ti)-Tvad(:,ti));
+        SRST = -TS_RST*(S(:,ti)-Svad(:,ti));
+    
+        %Zonal pressure gradient:
+        UPGF = PGF_X + PGF_K(:,ti);
+    
+        %TIW Stretching:
+        UDIV = dvdy(:,ti).*u(:,ti);
   
-    BF_X = URST+UPGF+UDIV+0*UVAD;
-    BF_Y = VRST+0*VVAD; % Vertical mom advection is zero!!!!!!!!!!!!!!
-    BF_T = TRST+TVAD;
-    BF_S = SRST+SVAD;
+        BF_X = URST + VADV_UV*UVAD + UPGF + UDIV;
+        BF_Y = VRST + VADV_UV*VVAD;
+        BF_T = TRST + VADV_TS*TVAD;
+        BF_S = SRST + VADV_TS*SVAD;
+    end
     
     %Calculate step ti+1:
     [u(:,ti+1),tmp] = Diff1Dstep(u(:,ti),kv(:,ti),gamv(:,ti),Hz,Hzw,-TAU_X/rho0,BF_X,Nz,dt);
@@ -271,9 +288,18 @@ for ti = 1:(length(t)-1)
 
 end
 
-Diff1Dredout;
-if (exist(out_folder)==7 | exist(out_folder)==5)
-    ['Saving run ' num2str(run) ' to folder ' out_folder]
-    save(sprintf([out_folder 'run_%03d.mat'],run));
+if (VADV_ONLY == 1)
+    Tvad = T;
+    Svad = S;
+    if (exist(out_folder)==7 | exist(out_folder)==5)
+        ['Saving VADV_ONLY run ' num2str(run) ' to folder ' out_folder]
+        save(sprintf([out_folder 'VADV_ONLY_run_%03d.mat'],run),'Tvad','Svad');
+    end
+else
+    Diff1Dredout;
+    if (exist(out_folder)==7 | exist(out_folder)==5)
+        ['Saving run ' num2str(run) ' to folder ' out_folder]
+        save(sprintf([out_folder 'run_%03d_' suffix '.mat'],run));
+    end
 end
 
