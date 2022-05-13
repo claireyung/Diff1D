@@ -35,8 +35,8 @@ clear all;
 Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
-run = 2;
-out_folder = './testing/'; %folder to save data to (will be labeled with
+run = 1;
+out_folder = './data/'; %folder to save data to (will be labeled with
                       %run number). 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,7 +50,9 @@ NOUT = 1; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
-tau_x = -0.08*ones(size(t)); %Nm-2 = kg m-1 s-2
+period = 15*86400; %peroid of oscillation (s)
+amplitude = 0.04; %2.8e-6; %amplitude of stretching dv/dy.
+tau_x = -0.08*ones(size(t)) + amplitude*sin(2*pi/period*t); %Nm-2 = kg m-1 s-2
 tau_y = 0*ones(size(t)); %Nm-2
 
 ssflux = 0*ones(size(t)); %psu kg-1 m-2 s-1
@@ -93,7 +95,7 @@ w = zeros(Nz+1,Nt);
 SYM = 0; %0 -> body force is dvdy*u
          %1 -> body force is dvdy*u_initial
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 2.8e-6; %amplitude of stretching dv/dy.
+amplitude = 0; %2.8e-6; %amplitude of stretching dv/dy.
 dvdy = amplitude*sin(2*pi/period*t); %dv/dy time change
 dvdy_v = '(5.2e-9/2.8e-6)*z_rho+1'; %Vertical form of dvdy
 
@@ -135,27 +137,27 @@ KPPMLD = -15; %Initial guess mixed layer.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % INITIAL conditions
 
-% $$$ % Initial profiles from mean BMIX profiles:
-% $$$ load('BMIX_140W_TS.mat');
-% $$$ zI = mean(Z,2);
-% $$$ uI = mean(U,2);
-% $$$ vI = mean(V,2)*0; %SET TO ZERO!!!
-% $$$ TI = mean(T,2);
-% $$$ SI = mean(S,2);
-% $$$ bI = g*alpha*TI-g*beta*SI;
-% $$$ zwI = (zI(2:end)+zI(1:(end-1)))/2;
-
-% Initial profiles from TPOS20 Sep-Dec:
-load('TPOS20_140W_TS.mat');
-dvec = datevec(time);
-inds = dvec(:,2)>=9;
-zI = Z;
-uI = mean(U(:,inds),2);
-vI = 0*mean(V(:,inds),2);
-TI = mean(T(:,inds),2);
-SI = mean(S(:,inds),2);
+% Initial profiles from mean BMIX profiles:
+load('data/BMIX_140W_TS.mat');
+zI = mean(Z,2);
+uI = mean(U,2);
+vI = mean(V,2)*0; %SET TO ZERO!!!
+TI = mean(T,2);
+SI = mean(S,2);
 bI = g*alpha*TI-g*beta*SI;
 zwI = (zI(2:end)+zI(1:(end-1)))/2;
+
+% $$$ % Initial profiles from TPOS20 Sep-Dec:
+% $$$ load('TPOS20_140W_TS.mat');
+% $$$ dvec = datevec(time);
+% $$$ inds = dvec(:,2)>=9;
+% $$$ zI = Z;
+% $$$ uI = mean(U(:,inds),2);
+% $$$ vI = 0*mean(V(:,inds),2);
+% $$$ TI = mean(T(:,inds),2);
+% $$$ SI = mean(S(:,inds),2);
+% $$$ bI = g*alpha*TI-g*beta*SI;
+% $$$ zwI = (zI(2:end)+zI(1:(end-1)))/2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

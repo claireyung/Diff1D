@@ -10,10 +10,10 @@ txtx = (t(end)/86400)*0.995;
 txty = -220;
 
 %Times to plot:
-[tmp tII] = min(abs(t/86400-135));
-[tmp tFF] = min(abs(t/86400-165));
-% $$$ [tmp tII] = min(abs(t/86400));
-% $$$ [tmp tFF] = min(abs(t/86400-120));
+% $$$ [tmp tII] = min(abs(t/86400-135));
+% $$$ [tmp tFF] = min(abs(t/86400-165));
+[tmp tII] = min(abs(t/86400));
+[tmp tFF] = min(abs(t/86400-120));
 tplot = 15;
 tvec = tII:tplot:tFF;
 
@@ -170,6 +170,7 @@ text(X(1,tvec(1))-20,txty,names(sp),'FontSize',15,'BackgroundColor','w', ...
      'HorizontalAlignment','right');
 xlim([X(1,tvec(1)) X(1,tvec(end))]);
 
+meanplot = 0;
 if (meanplot)
     %Plot average curves inside on left:
 xlim([-7 t(end)/86400]);
