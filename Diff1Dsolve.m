@@ -35,8 +35,8 @@ clear all;
 Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
-run = 1;
-out_folder = './'; %folder to save data to (will be labeled with
+run = 2;
+out_folder = './testing/'; %folder to save data to (will be labeled with
                       %run number). 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,7 +44,7 @@ out_folder = './'; %folder to save data to (will be labeled with
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
 dt = 120;
-tfin = 15*86400; %sec
+tfin = 45*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
 NOUT = 1; %output averaged every NOUT time steps.
 
@@ -109,7 +109,7 @@ kv0 = 1e-4; %m2s-1 interior background
 kt0 = 1e-5; %m2s-1 interior background
 ks0 = 1e-5; %m2s-1 interior background
 
-if (INT==1)     % KPP 
+if (INT==1)     % KPP
     Ri0 = 0.7; %Critical Richardson number
     K0 = 2e-3; %Interior diffusivity maximum
 
@@ -135,13 +135,25 @@ KPPMLD = -15; %Initial guess mixed layer.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % INITIAL conditions
 
-% Initial profiles from mean BMIX profiles:
-load('BMIX_140W_TS.mat');
-zI = mean(Z,2);
-uI = mean(U,2);
-vI = mean(V,2)*0; %SET TO ZERO!!!
-TI = mean(T,2);
-SI = mean(S,2);
+% $$$ % Initial profiles from mean BMIX profiles:
+% $$$ load('BMIX_140W_TS.mat');
+% $$$ zI = mean(Z,2);
+% $$$ uI = mean(U,2);
+% $$$ vI = mean(V,2)*0; %SET TO ZERO!!!
+% $$$ TI = mean(T,2);
+% $$$ SI = mean(S,2);
+% $$$ bI = g*alpha*TI-g*beta*SI;
+% $$$ zwI = (zI(2:end)+zI(1:(end-1)))/2;
+
+% Initial profiles from TPOS20 Sep-Dec:
+load('TPOS20_140W_TS.mat');
+dvec = datevec(time);
+inds = dvec(:,2)>=9;
+zI = Z;
+uI = mean(U(:,inds),2);
+vI = 0*mean(V(:,inds),2);
+TI = mean(T(:,inds),2);
+SI = mean(S(:,inds),2);
 bI = g*alpha*TI-g*beta*SI;
 zwI = (zI(2:end)+zI(1:(end-1)))/2;
 
