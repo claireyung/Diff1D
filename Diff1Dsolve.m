@@ -51,12 +51,14 @@ NOUT = 1; %output averaged every NOUT time steps.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 0.04; %2.8e-6; %amplitude of stretching dv/dy.
+amplitude = 0.04; %amplitude of wind stress oscillation (Nm-2)
 tau_x = -0.08*ones(size(t)) + amplitude*sin(2*pi/period*t); %Nm-2 = kg m-1 s-2
 tau_y = 0*ones(size(t)); %Nm-2
 
 ssflux = 0*ones(size(t)); %psu kg-1 m-2 s-1
-shflux = -180*ones(size(t)); %surface heat flux (use srflux = 0 and shflux = total
+period = 15*86400; %peroid of oscillation (s)
+amplitude = 0;%200; %2.8e-6; %amplitude of heat flux variation
+shflux = -180*ones(size(t)) + amplitude*sin(2*pi/period*t); %surface heat flux (use srflux = 0 and shflux = total
               %for all at surface). Wm-2 = J s-1 m-2 = kg s-3
 
 DIR = 0; %Include a diurnal cycle?
