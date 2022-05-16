@@ -35,7 +35,7 @@ clear all;
 Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
-run = 1;
+run = 2;
 out_folder = './data/'; %folder to save data to (will be labeled with
                       %run number). 
 
@@ -57,8 +57,8 @@ tau_y = 0*ones(size(t)); %Nm-2
 
 ssflux = 0*ones(size(t)); %psu kg-1 m-2 s-1
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 0;%200; %2.8e-6; %amplitude of heat flux variation
-shflux = -180*ones(size(t)) + amplitude*sin(2*pi/period*t); %surface heat flux (use srflux = 0 and shflux = total
+amplitude = 120; %2.8e-6; %amplitude of heat flux variation
+shflux = -180*ones(size(t)); %surface heat flux (use srflux = 0 and shflux = total
               %for all at surface). Wm-2 = J s-1 m-2 = kg s-3
 
 DIR = 0; %Include a diurnal cycle?
@@ -69,7 +69,7 @@ if (DIR)
     srflux(hr/24<0.25)=0;
     srflux(hr/24>0.75)=0;
 else
-    srflux = srflux*ones(size(t));
+    srflux = srflux*ones(size(t)) + amplitude*sin(2*pi/period*t);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
