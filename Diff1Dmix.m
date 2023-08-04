@@ -33,7 +33,10 @@ kint(Ri>0 & Ri<Ri0) = K0*(1-(Ri(Ri>0 & Ri<Ri0)/Ri0).^2).^3;
 %Add on these diffusivities:
 kv(:,ti) = kv(:,ti)+kint;
 kt(:,ti) = kt(:,ti)+kint;
-ks(:,ti) = ks(:,ti)+kint;        
+ks(:,ti) = ks(:,ti)+kint;      
+
+%Add to kt_int
+kt_int(:,ti) = kt_int(:,ti)+kint;
 
 elseif (INT == 2)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -247,7 +250,11 @@ Gs = a0+a1*sig+a2s*sig.*sig+a3s.*sig.*sig;
 %Calculate diffusivities:
 kv(sig<1 & sig>0,ti) = (-KPPMLD)*wm(sig<1 & sig>0).*Gv(sig<1 & sig>0);
 kt(sig<1 & sig>0,ti) = (-KPPMLD)*ws(sig<1 & sig>0).*Gt(sig<1 & sig>0);
-ks(sig<1 & sig>0,ti) = (-KPPMLD)*ws(sig<1 & sig>0).*Gs(sig<1 & sig>0);        
+ks(sig<1 & sig>0,ti) = (-KPPMLD)*ws(sig<1 & sig>0).*Gs(sig<1 & sig>0); 
+
+%Add to kt_bl
+kt_bl(sig<1 & sig>0,ti) = (-KPPMLD)*ws(sig<1 & sig>0).*Gt(sig<1 & sig>0);
+
 
 %Calculate non-local transports:
 if (nl)
@@ -256,6 +263,7 @@ if (nl)
                                                   0))./(ws(zeta<0)*(-KPPMLD)+small);
     gams(sig>1 | sig<0,ti) = 0;
     gamt(sig>1 | sig<0,ti) = 0;
+
 end
 
 end

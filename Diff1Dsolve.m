@@ -31,11 +31,10 @@
 
 % Setup:
 close all;
-clear all;
-Diff1Dconst;
+clear all;Diff1Dconst;
 
 %%%% RUN NUMBER %%%%%%%
-run = 2;
+run = 12;
 out_folder = './data/'; %folder to save data to (will be labeled with
                       %run number). 
 
@@ -44,25 +43,25 @@ out_folder = './data/'; %folder to save data to (will be labeled with
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TIME stepping 
 dt = 120;
-tfin = 45*86400; %sec
+tfin = 45*86400; %45*86400; %sec
 t = 0:dt:tfin;Nt = length(t); %time
 NOUT = 1; %output averaged every NOUT time steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SURFACE forcing 
-period = 15*86400; %peroid of oscillation (s)
+period = 15*86400; %peroid of oscillation (s) 15*86400
 amplitude = 0.04; %amplitude of wind stress oscillation (Nm-2)
-tau_x = -0.08*ones(size(t)) + amplitude*sin(2*pi/period*t); %Nm-2 = kg m-1 s-2
+tau_x = -0.08*ones(size(t)) ;%+ amplitude*sin(2*pi/period*t); %Nm-2 = kg m-1 s-2
 tau_y = 0*ones(size(t)); %Nm-2
 
 ssflux = 0*ones(size(t)); %psu kg-1 m-2 s-1
 period = 15*86400; %peroid of oscillation (s)
-amplitude = 120; %2.8e-6; %amplitude of heat flux variation
+amplitude = 150; %2.8e-6; %amplitude of heat flux variation
 shflux = -180*ones(size(t)); %surface heat flux (use srflux = 0 and shflux = total
               %for all at surface). Wm-2 = J s-1 m-2 = kg s-3
 
 DIR = 0; %Include a diurnal cycle?
-srflux = 275; %radiative heat flux.
+srflux = 275; %275; %radiative heat flux.
 if (DIR)
     hr = mod(t/3600,24);
     srflux = srflux*4*(cos((2*(hr/24)-1)*pi)).^2;
@@ -181,6 +180,7 @@ eval(['dvdy = repmat(dvdy,[Nz 1]).*repmat(' dvdy_v ...
 u = zeros(Nz,Nt);v = zeros(Nz,Nt);T = zeros(Nz,Nt);
 S = zeros(Nz,Nt);b = zeros(Nz,Nt);%z_rho variables
 kv = zeros(Nz+1,Nt);kt = zeros(Nz+1,Nt);ks = zeros(Nz+1,Nt);
+kt_int = zeros(Nz+1,Nt);kt_bl = zeros(Nz+1,Nt);
 gamv=zeros(Nz+1,Nt);gamt=zeros(Nz+1,Nt);gams= zeros(Nz+1,Nt);
 bulkRiN = zeros(Nz+1,Nt);bulkRiD = zeros(Nz+1,Nt);%z_w variables
 Hsbl = zeros(1,Nt);

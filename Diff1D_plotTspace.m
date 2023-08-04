@@ -21,7 +21,7 @@ dJdz = (J(2:end,:)-J(1:(end-1),:)); % Wm-2 within each grid cell
 
 % Calculate J non-local:
 Jnl = zeros(Nz+1,Nt);
-Jnl = -gamt*Cp*rho0;
+Jnl = -gamt.*kt*Cp*rho0;
 dJnldz = (Jnl(2:end,:)-Jnl(1:(end-1),:)); % Wm-2 within each grid cell
 
 % Define temperature grid:
@@ -64,19 +64,21 @@ JnlTmean = cat(1,zeros(1,1),cumsum(JnlTmean));
 figure;
 tind = 50;
 subplot(1,2,1);
-plot(J(:,tind),z_w,'--k');
+plot(J(:,tind),z_w,'--k', 'DisplayName','Diffusive Snapshot');
 hold on;
-plot(mean(J,2),z_w,'-k','linewidth',2);
+plot(mean(J,2),z_w,'-k','linewidth',2,'DisplayName','Diffusive Mean');
 
-plot(Jnl(:,tind),z_w,'--r');
-plot(mean(Jnl,2),z_w,'-r','linewidth',2);
+plot(Jnl(:,tind),z_w,'--r','DisplayName','Nonlocal Snapshot');
+plot(mean(Jnl,2),z_w,'-r','linewidth',2, 'DisplayName','Nonlocal Mean');
+legend('Location','southeast');
 
 subplot(1,2,2);
-plot(JT(:,tind),Tie,'--k');
+plot(JT(:,tind),Tie,'--k', 'DisplayName','Diffusive Snapshot');
 hold on;
-plot(mean(JT,2),Tie,'-k','linewidth',2);
-plot(JTmean,Tie,':k','linewidth',2);
-plot(JnlT(:,tind),Tie,'--r');
-plot(mean(JnlT,2),Tie,'-r','linewidth',2);
-plot(JnlTmean,Tie,':r','linewidth',2);
+plot(mean(JT,2),Tie,'-k','linewidth',2,'DisplayName','Diffusive Total');
+plot(JTmean,Tie,':k','linewidth',2,'DisplayName','Diffusive Mean');
+plot(JnlT(:,tind),Tie,'--r','DisplayName','Nonlocal Snapshot');
+plot(mean(JnlT,2),Tie,'-r','linewidth',2,'DisplayName','Nonlocal Total');
+plot(JnlTmean,Tie,':r','linewidth',2,'DisplayName','Nonlocal Mean');
 
+legend('Location','southeast');
